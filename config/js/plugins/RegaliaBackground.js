@@ -824,7 +824,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             reminder.style.color = 'var(--plug-color1)';
             reminder.style.fontSize = '9px';
             reminder.style.fontWeight = 'bold';
-            reminder.style.fontFamily = 'Montserrat, sans-serif';
+            reminder.style.fontFamily = 'inherit';
             reminder.style.textAlign = 'right';
             reminder.style.padding = '10px';
             reminder.style.marginRight = '30px';
@@ -914,7 +914,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             pageInfo.className = 'page-info';
             pageInfo.style.color = 'var(--plug-color1)';
             pageInfo.style.fontSize = '14px';
-            pageInfo.style.fontFamily = 'Montserrat, sans-serif';
+            pageInfo.style.fontFamily = 'inherit';
             pageInfo.style.fontWeight = 'normal';
             pageInfo.style.cursor = 'pointer';
             pageInfo.style.padding = '6px 12px';
@@ -1242,7 +1242,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                         const animationBadge = document.createElement('div');
                         animationBadge.textContent = 'ANIMATED';
                         animationBadge.style.position = 'absolute';
-                        animationBadge.style.fontFamily = 'var(--font-display)';
+                        animationBadge.style.fontFamily = 'inherit';
                         animationBadge.style.top = '5px';
                         animationBadge.style.left = '5px';
                         animationBadge.style.color = '#010a13';
@@ -1259,7 +1259,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                         const tftBadge = document.createElement('div');
                         tftBadge.textContent = 'TFT';
                         tftBadge.style.position = 'absolute';
-                        tftBadge.style.fontFamily = 'var(--font-display)';
+                        tftBadge.style.fontFamily = 'inherit';
                         tftBadge.style.top = '5px';
                         tftBadge.style.right = '5px';
                         tftBadge.style.color = '#000';
@@ -1274,7 +1274,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                         const lolBadge = document.createElement('div');
                         lolBadge.textContent = 'LoL';
                         lolBadge.style.position = 'absolute';
-                        lolBadge.style.fontFamily = 'var(--font-display)';
+                        lolBadge.style.fontFamily = 'inherit';
                         lolBadge.style.top = '5px';
                         lolBadge.style.right = '5px';
                         lolBadge.style.color = '#000';

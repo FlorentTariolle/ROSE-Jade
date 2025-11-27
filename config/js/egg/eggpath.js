@@ -139,7 +139,7 @@
         signature.style.color = '#543a60';
         signature.style.fontSize = '9px';
         signature.style.fontWeight = 'bold';
-        signature.style.fontFamily = 'Montserrat, sans-serif';
+        signature.style.fontFamily = 'inherit';
         signature.style.textAlign = 'right';
         signature.style.padding = '5px';
         signature.style.zIndex = '10001';
@@ -188,7 +188,7 @@
         title.style.textAlign = 'center';
         title.style.color = '#856ec8';
         title.style.fontSize = '24px';
-        title.style.fontFamily = 'Beaufort for LOL, Arial, sans-serif';
+        title.style.fontFamily = 'inherit';
         title.style.zIndex = '1';
 
         const description = document.createElement('p');
@@ -197,7 +197,7 @@
         description.style.textAlign = 'center';
         description.style.color = '#5f5969';
         description.style.fontSize = '14px';
-        description.style.fontFamily = 'Beaufort for LOL, Arial, sans-serif';
+        description.style.fontFamily = 'inherit';
         description.style.zIndex = '1';
 
         const passwordInput = document.createElement('input');

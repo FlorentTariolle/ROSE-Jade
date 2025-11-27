@@ -327,7 +327,7 @@
       reminder.style.color = 'var(--plug-color1)';
       reminder.style.fontSize = '9px';
       reminder.style.fontWeight = 'bold';
-      reminder.style.fontFamily = 'Montserrat, sans-serif';
+      reminder.style.fontFamily = 'inherit';
       reminder.style.textAlign = 'right';
       reminder.style.padding = '10px';
       reminder.style.marginBottom = '0px';
@@ -452,7 +452,7 @@
       } catch (error) {
         list.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-            <p style="color: #e63946; font-size: 16px; margin: 0; font-family: Montserrat, sans-serif;">
+            <p style="color: #e63946; font-size: 16px; margin: 0; font-family: inherit;">
               Failed to load titles for ${this.currentLanguage.toUpperCase()} language.
             </p>
           </div>
@@ -487,7 +487,7 @@
         const titleText = document.createElement('span');
         titleText.textContent = title.titleName;
         titleText.style.color = '#ffffff';
-        titleText.style.fontFamily = 'Montserrat, sans-serif';
+        titleText.style.fontFamily = 'inherit';
         titleText.style.fontSize = '12px';
         titleText.style.fontWeight = '500';
         titleText.style.textAlign = 'center';
@@ -532,7 +532,7 @@
       });
 
       if (titles.length === 0) {
-        this.titlesList.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;"><p style="color: #e63946; font-size: 16px; margin: 0; font-family: Montserrat, sans-serif;">No titles found matching your search.</p></div>';
+        this.titlesList.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px;"><p style="color: #e63946; font-size: 16px; margin: 0; font-family: inherit;">No titles found matching your search.</p></div>';
       }
     }
 

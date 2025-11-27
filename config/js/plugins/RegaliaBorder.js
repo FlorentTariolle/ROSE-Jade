@@ -420,7 +420,7 @@
       reminder.style.color = 'var(--plug-color1)';
       reminder.style.fontSize = '9px';
       reminder.style.fontWeight = 'bold';
-      reminder.style.fontFamily = 'Montserrat, sans-serif';
+      reminder.style.fontFamily = 'inherit';
       reminder.style.textAlign = 'right';
       reminder.style.padding = '10px';
       reminder.style.marginRight = '30px';
@@ -486,7 +486,7 @@
       classicTab.style.border = 'none';
       classicTab.style.borderRadius = '0px';
       classicTab.style.cursor = 'pointer';
-      classicTab.style.fontFamily = 'Montserrat, sans-serif';
+      classicTab.style.fontFamily = 'inherit';
       classicTab.style.fontWeight = 'bold';
       classicTab.style.flex = '1';
       classicTab.style.width = '50%';
@@ -502,7 +502,7 @@
       rankedTab.style.border = 'none';
       rankedTab.style.borderRadius = '0px';
       rankedTab.style.cursor = 'pointer';
-      rankedTab.style.fontFamily = 'Montserrat, sans-serif';
+      rankedTab.style.fontFamily = 'inherit';
       rankedTab.style.fontWeight = 'bold';
       rankedTab.style.flex = '1';
       rankedTab.style.width = '50%';

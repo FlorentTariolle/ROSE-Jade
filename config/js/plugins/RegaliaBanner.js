@@ -307,7 +307,7 @@
       reminder.style.color = 'var(--plug-color1)';
       reminder.style.fontSize = '9px';
       reminder.style.fontWeight = 'bold';
-      reminder.style.fontFamily = 'Montserrat, sans-serif';
+      reminder.style.fontFamily = 'inherit';
       reminder.style.textAlign = 'right';
       reminder.style.padding = '10px';
       reminder.style.marginRight = '30px';

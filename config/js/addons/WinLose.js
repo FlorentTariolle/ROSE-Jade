@@ -744,7 +744,7 @@ let data = [
 			font-size: 14px;
 			font-weight: 600;
 			letter-spacing: 0.5px;
-			font-family: "LoL Display", "LoL Body", sans-serif;
+			font-family: inherit;
 			align-items: center;
 			flex-direction: column;
         }
@@ -797,7 +797,7 @@ let data = [
         }
         #winlose-settings .lol-settings-general-title {
           color: #f0e6d2;
-          font-family: "LoL Display";
+          font-family: inherit;
           font-size: 14px;
           font-weight: 700;
           letter-spacing: 0.0375em;

@@ -52,7 +52,7 @@
             this.playButton.style.cursor = 'pointer';
             
             this.playButton.style.color = '#cdbe91';
-            this.playButton.style.fontFamily = 'var(--font-display)';
+            this.playButton.style.fontFamily = 'inherit';
             this.playButton.style.fontSize = '10px';
             this.playButton.style.fontWeight = 'bold';
             this.playButton.style.letterSpacing = '1px';
@@ -231,7 +231,7 @@
             this.minimizedButton.style.cursor = 'pointer';
             
             this.minimizedButton.style.color = '#cdbe91';
-            this.minimizedButton.style.fontFamily = 'var(--font-display)';
+            this.minimizedButton.style.fontFamily = 'inherit';
             this.minimizedButton.style.fontSize = '10px';
             this.minimizedButton.style.fontWeight = 'bold';
             this.minimizedButton.style.letterSpacing = '1px';
