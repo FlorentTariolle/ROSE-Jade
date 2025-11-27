@@ -95,6 +95,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             this.blurObserver = null;
             this.isChampionSelectActive = false;
             this.championSelectObserver = null;
+            this.buttonCheckInterval = null;
             this.settings = {
                 blurAmount: 5
             };
@@ -118,18 +119,18 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         loadSettings() {
-            const savedSettings = DataStore?.get("bgcm-settings");
-            if (savedSettings) {
-                try {
-                    const parsed = JSON.parse(savedSettings);
-                    this.settings.blurAmount = parsed.blurAmount ?? 5;
-                } catch (e) {}
-            }
+            const savedSettings = window.DataStore?.get("bgcm-settings");
+        if (savedSettings) {
+            try {
+                const parsed = JSON.parse(savedSettings);
+                this.settings.blurAmount = parsed.blurAmount ?? 5;
+            } catch (e) {}
+        }
         }
 
         saveSettings() {
             if (window.DataStore) {
-                DataStore.set("bgcm-settings", JSON.stringify(this.settings));
+                window.DataStore.set("bgcm-settings", JSON.stringify(this.settings));
             }
         }
 
@@ -681,7 +682,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         buttonContainerObserver() {
-            const checkInterval = setInterval(() => {
+            this.buttonCheckInterval = setInterval(() => {
                 if (this.isChampionSelectActive) return;
                 
                 const isContainerVisible = this.isButtonContainerVisible();
@@ -1365,6 +1366,10 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         destroy() {
+            if (this.buttonCheckInterval) {
+                clearInterval(this.buttonCheckInterval);
+                this.buttonCheckInterval = null;
+            }
             if (this.customButton && document.body.contains(this.customButton)) {
                 document.body.removeChild(this.customButton);
             }
@@ -1400,7 +1405,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 		}
 
 		loadSettings() {
-			const savedSettings = DataStore?.get("bgcm-settings");
+			const savedSettings = window.DataStore?.get("bgcm-settings");
 			if (savedSettings) {
 				try {
 					const parsed = JSON.parse(savedSettings);
@@ -1411,7 +1416,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 
 		saveSettings() {
 			if (window.DataStore) {
-				DataStore.set("bgcm-settings", JSON.stringify(this.settings));
+				window.DataStore.set("bgcm-settings", JSON.stringify(this.settings));
 			}
 			
 			if (window.BGCM) {

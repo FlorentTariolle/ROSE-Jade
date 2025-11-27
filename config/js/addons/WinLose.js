@@ -77,7 +77,7 @@ let data = [
     },
 
     saveLanguageToStorage(language) {
-      DataStore.set('winlose-language', language);
+      window.DataStore?.set('winlose-language', language);
     },
 
     translations: {
@@ -155,7 +155,7 @@ let data = [
   const SettingsStore = {
     async loadSettings() {
       try {
-        const settings = DataStore.get("winlose-settings");
+        const settings = window.DataStore?.get("winlose-settings");
         if (settings) {
           const userSettings = JSON.parse(settings);
           CONFIG = {
@@ -181,7 +181,7 @@ let data = [
           lossesDisplay: CONFIG.lossesDisplay,
           winrateDisplay: CONFIG.winrateDisplay,
         };
-        DataStore.set("winlose-settings", JSON.stringify(settings));
+        window.DataStore?.set("winlose-settings", JSON.stringify(settings));
       } catch (error) {}
     },
   };
@@ -220,7 +220,7 @@ let data = [
       this.lastCheckTime = 0;
       this.checkThrottle = 1000;
       this.isCleanedUp = false;
-      this.init();
+      this.initPromise = this.init().catch(() => {});
     }
 
     async init() {

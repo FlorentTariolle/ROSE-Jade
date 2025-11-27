@@ -85,7 +85,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         loadSettings() {
-            const savedSettings = DataStore?.get("eaa-settings");
+        const savedSettings = window.DataStore?.get("eaa-settings");
             if (savedSettings) {
                 try {
                     const parsed = JSON.parse(savedSettings);
@@ -202,6 +202,8 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             this.countdownInterval = null;
             this.readyCheckTimeout = null;
             this.readyCheckStartTime = null;
+            this.uiChangeInterval = null;
+            this.readyCheckInterval = null;
         }
 
         forceCleanupReadyCheck() {
@@ -230,9 +232,9 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         startObservers() {
-            setInterval(() => this.checkForUIChanges(), 1000);
+            this.uiChangeInterval = setInterval(() => this.checkForUIChanges(), 1000);
             
-            setInterval(() => {
+            this.readyCheckInterval = setInterval(() => {
                 if (this.readyCheckStartTime) {
                     const timeSinceStart = Date.now() - this.readyCheckStartTime;
                     if (timeSinceStart > 20000) {
@@ -255,6 +257,14 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             if (this.observer) {
                 this.observer.disconnect();
             }
+            if (this.uiChangeInterval) {
+                clearInterval(this.uiChangeInterval);
+                this.uiChangeInterval = null;
+            }
+            if (this.readyCheckInterval) {
+                clearInterval(this.readyCheckInterval);
+                this.readyCheckInterval = null;
+            }
             this.cleanupReadyCheck();
             this.restoreSoundMuting();
         }
@@ -276,7 +286,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         loadSettings() {
-            const savedSettings = DataStore?.get("eaa-settings");
+        const savedSettings = window.DataStore?.get("eaa-settings");
             if (savedSettings) {
                 try {
                     const parsed = JSON.parse(savedSettings);
@@ -289,7 +299,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 
         saveSettings() {
             if (window.DataStore) {
-                DataStore.set("eaa-settings", JSON.stringify(this.settings));
+                window.DataStore.set("eaa-settings", JSON.stringify(this.settings));
             }
         }
 

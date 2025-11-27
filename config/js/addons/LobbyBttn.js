@@ -13,7 +13,7 @@ import "../css/LobbyBttn.css";
       this.isActivated = false;
       this.observerInterval = null;
       this.transformInterval = null;
-      this.init();
+      this.initPromise = this.init().catch(() => {});
     }
 
     async init() {
