@@ -1,5 +1,6 @@
 /*===================================================================================================================*/
 :root {
+  /* Fonts were removed intentionally */
 }
 
 :root {
@@ -38,7 +39,7 @@
   --plug-search-inputFocus-border-color: #81602b;
   --plug-search-inputFocus-box-shadow: 0 0 10px rgba(84, 58, 96, 0.3);
   /*------------------------------------------*/
-  --plug-jsbutton-color: 2px solid #81602b; /* #81602b lol color*/
+  --plug-jsbutton-color: #81602b; /* #81602b lol color*/
   /*------------------------------------------*/
   --plug-soft-text-glow-kda1: rgb(255 155 0) 0px 0px 17px;
   --plug-soft-text-glow-kda2: rgb(255 143 0 / 37%) 0px 0px 76px;

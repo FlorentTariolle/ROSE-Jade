@@ -114,7 +114,7 @@
             content.style.flexDirection = 'column';
 
             const iframe = document.createElement('iframe');
-            iframe.src = 'https://plugins/Jade/config/html/egg.html';
+            iframe.src = '../html/egg.html';
             iframe.style.width = '100%';
             iframe.style.height = '100%';
             iframe.style.border = 'none';

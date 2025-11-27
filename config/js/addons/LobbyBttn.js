@@ -1,4 +1,4 @@
-import "https://plugins/ROSE-Launcher/config/css/LobbyBttn.css";
+import "../css/LobbyBttn.css";
 
 (() => {
   const CONFIG = {
@@ -217,7 +217,8 @@ import "https://plugins/ROSE-Launcher/config/css/LobbyBttn.css";
         tftMatchH: '.tft-match-history-list',
         emblemProfile: '.style-profile-emblems-container',
         CCG: '.challenges-collection-component .content .grid',
-        LLC: '.lol-leagues .lol-leagues-container'
+        LLC: '.lol-leagues .lol-leagues-container',
+        PMC: '.party-members-container'
       };
 
       const zeroTransformations = {
@@ -241,7 +242,8 @@ import "https://plugins/ROSE-Launcher/config/css/LobbyBttn.css";
         tftMatchH: 'scale(0.7) translateX(-70px) translateY(-30px)',
         emblemProfile: 'scale(1) translateX(0px)',
         CCG: 'translateX(0px)',
-        LLC: 'translateX(0px)'
+        LLC: 'translateX(0px)',
+        PMC: 'translateX(0px)'
       };
 
       Object.keys(elementsConfig).forEach(key => {

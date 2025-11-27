@@ -239,7 +239,7 @@
         button.style.zIndex = '9999';
         button.style.padding = '5px';
         button.style.backgroundColor = '#1e292c';
-        button.style.border = 'var(--plug-jsbutton-color)';
+        button.style.border = '2px solid var(--plug-jsbutton-color)';
         button.style.borderRadius = '50%';
         button.style.cursor = 'pointer';
         button.style.width = '20px';
@@ -674,7 +674,7 @@
 		  pageInput.style.margin = pageInfoStyles.margin;
 		  pageInput.style.lineHeight = pageInfoStyles.lineHeight;
 		  pageInput.style.textAlign = 'center';
-		  pageInput.style.border = 'var (--plug-search-input-border)';
+		  pageInput.style.border = 'var(--plug-search-input-border)';
 		  pageInput.style.borderRadius = pageInfoStyles.borderRadius;
 		  pageInput.style.backgroundColor = '#131312';
 		  pageInput.style.color = '#728581';

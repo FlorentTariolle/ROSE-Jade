@@ -98,18 +98,22 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             this.settings = {
                 blurAmount: 5
             };
-            this.init();
+            this.initializationPromise = this.init().catch(() => {});
         }
 
         async init() {
             this.loadSettings();
-            this.loadData();
+            await this.loadData();
             this.buttonContainerObserver();
             this.applyCustomBackground();
             this.setupChampionSelectObserver();
             
             if (window.DataStore) {
-                selectedSkinId = window.DataStore.get('bgcm-selected-skin-id');
+                try {
+                    selectedSkinId = await window.DataStore.get('bgcm-selected-skin-id');
+                } catch (error) {
+                    selectedSkinId = null;
+                }
             }
         }
 
@@ -728,7 +732,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             button.style.zIndex = '9999';
             button.style.padding = '5px';
             button.style.backgroundColor = '#1e292c';
-            button.style.border = 'var(--plug-jsbutton-color)';
+            button.style.border = '2px solid var(--plug-jsbutton-color)';
             button.style.borderRadius = '50%';
             button.style.cursor = 'pointer';
             button.style.width = '20px';
@@ -798,7 +802,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             content.style.display = 'flex';
             content.style.flexDirection = 'column';
 
-            const logoUrl = 'https://plugins/ROSE-Launcher/assets/logo.png';
+            const logoUrl = 'https://plugins/ROSE-Jade/assets/logo.png';
             const testImg = new Image();
             testImg.onload = () => {
                 const logoBackground = document.createElement('div');
@@ -1022,7 +1026,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                 pageInput.style.margin = pageInfoStyles.margin;
                 pageInput.style.lineHeight = pageInfoStyles.lineHeight;
                 pageInput.style.textAlign = 'center';
-                pageInput.style.border = 'var (--plug-search-input-border)';
+                pageInput.style.border = 'var(--plug-search-input-border)';
                 pageInput.style.borderRadius = pageInfoStyles.borderRadius;
                 pageInput.style.backgroundColor = '#131312';
                 pageInput.style.color = '#728581';
@@ -1390,7 +1394,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 			this.init();
 		}
 
-		async init() {
+		init() {
 			this.loadSettings();
 			this.initializeSettings();
 		}
