@@ -103,7 +103,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         async init() {
-            this.loadSettings();
+            await this.loadSettings();
             await this.loadData();
             this.buttonContainerObserver();
             this.applyCustomBackground();
@@ -118,8 +118,8 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             }
         }
 
-        loadSettings() {
-            const savedSettings = window.DataStore?.get("bgcm-settings");
+        async loadSettings() {
+            const savedSettings = await window.DataStore?.get("bgcm-settings");
         if (savedSettings) {
             try {
                 const parsed = JSON.parse(savedSettings);
@@ -592,11 +592,11 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             this.cleanupInlineStyles();
         }
 
-        applyCustomBackground() {
+        async applyCustomBackground() {
             if (this.isChampionSelectActive) return;
             
-            const savedBackground = window.DataStore?.get('bgcm-selected-background');
-            const backgroundType = window.DataStore?.get('bgcm-background-type') || 'image';
+            const savedBackground = await window.DataStore?.get('bgcm-selected-background');
+            const backgroundType = (await window.DataStore?.get('bgcm-background-type')) || 'image';
             
             if (savedBackground) {
                 this.setCustomBackground(savedBackground, backgroundType === 'video');

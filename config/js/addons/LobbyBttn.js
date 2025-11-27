@@ -288,7 +288,7 @@ import "../css/LobbyBttn.css";
       button.style.cursor = 'pointer';
       button.style.transition = 'all 0.3s ease';
       button.style.whiteSpace = 'nowrap';
-	  button.style.filter = 'var(--Rose-filter2)';
+	  button.style.filter = 'var(--plug-filter2)';
       
       button.addEventListener('click', () => {
         this.toggleContainerPosition();

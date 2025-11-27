@@ -279,7 +279,7 @@
             width: 16px;
             height: 16px;
             background-color: #3a2842;
-            border-radius: '50%';
+            border-radius: 50%;
             border: none;
             cursor: pointer;
             display: flex;
@@ -372,15 +372,7 @@
 
   const loadEggPlugin = async () => {
     try {
-      const eggModule = await import("./egg.js");
-
-      if (eggModule.default) {
-        new eggModule.default();
-      } else if (typeof eggModule === "function") {
-        new eggModule();
-      } else if (eggModule.init) {
-        eggModule.init();
-      }
+      await import("./egg.js");
     } catch (error) {}
   };
 

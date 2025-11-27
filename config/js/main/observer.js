@@ -140,7 +140,10 @@ function periodicElementCheck() {
     }
   }
   
-  processedElements = newProcessedElements
+  processedElements.clear()
+  for (const elementId of newProcessedElements) {
+    processedElements.add(elementId)
+  }
 }
 
 function initializeObserver() {

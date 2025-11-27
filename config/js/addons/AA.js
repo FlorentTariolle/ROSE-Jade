@@ -78,14 +78,14 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         async init() {
-            this.loadSettings();
+            await this.loadSettings();
             this.setupSoundMuting();
             this.startObservers();
             this.checkForUIChanges();
         }
 
-        loadSettings() {
-        const savedSettings = window.DataStore?.get("eaa-settings");
+        async loadSettings() {
+        const savedSettings = await window.DataStore?.get("eaa-settings");
             if (savedSettings) {
                 try {
                     const parsed = JSON.parse(savedSettings);
@@ -281,12 +281,12 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
         }
 
         async init() {
-            this.loadSettings();
+            await this.loadSettings();
             this.initializeSettings();
         }
 
-        loadSettings() {
-        const savedSettings = window.DataStore?.get("eaa-settings");
+        async loadSettings() {
+            const savedSettings = await window.DataStore?.get("eaa-settings");
             if (savedSettings) {
                 try {
                     const parsed = JSON.parse(savedSettings);

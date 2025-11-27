@@ -155,7 +155,7 @@ let data = [
   const SettingsStore = {
     async loadSettings() {
       try {
-        const settings = window.DataStore?.get("winlose-settings");
+        const settings = await window.DataStore?.get("winlose-settings");
         if (settings) {
           const userSettings = JSON.parse(settings);
           CONFIG = {
