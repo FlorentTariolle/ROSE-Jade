@@ -1,6 +1,6 @@
 (() => {
   const CONFIG = {
-    API_URL: "https://plugins/ROSE-Launcher/API/border.json",
+    API_URL: "/plugins/ROSE-Jade/API/border.json",
     MODAL_ID: "regalia.border-modal",
     DATASTORE_KEY: "regalia.border-datastore"
   };
@@ -394,7 +394,7 @@
       content.style.display = 'flex';
       content.style.flexDirection = 'column';
 	  
-	  const logoUrl = 'https://plugins/ROSE-Launcher/assets/logo.png';
+	  const logoUrl = '/plugins/ROSE-Jade/assets/logo.png';
 		const testImg = new Image();
 		testImg.onload = () => {
 		  const logoBackground = document.createElement('div');

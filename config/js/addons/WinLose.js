@@ -711,7 +711,7 @@ let data = [
     }
 
     checkCurrentProfile() {
-      if (this.statsContainer && document.contains(this.statsContainer)) {
+    if (this.statsContainer && document.body.contains(this.statsContainer)) {
         return;
       }
 
@@ -728,7 +728,7 @@ let data = [
       const puuid = targetProfile.getAttribute("puuid");
       if (!puuid) return;
 
-      if (puuid !== this.currentSummonerId || !this.statsContainer || !document.contains(this.statsContainer)) {
+      if (puuid !== this.currentSummonerId || !this.statsContainer || !document.body.contains(this.statsContainer)) {
         this.currentSummonerId = puuid;
         this.createStatsContainer();
         this.updateStats(puuid);

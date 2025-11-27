@@ -163,6 +163,7 @@
       this.iconsData = null;
       this.dataLoaded = false;
       this.sortedIcons = null;
+      this.buttonCheckInterval = null;
       this.init();
     }
 
@@ -199,7 +200,10 @@
     }
 	
 	IconContainerObserver() {
-		const checkInterval = setInterval(() => {
+		if (this.buttonCheckInterval) {
+			clearInterval(this.buttonCheckInterval);
+		}
+		this.buttonCheckInterval = setInterval(() => {
 			const isIconVisible = this.isIconContainerVisible();
 			
 			if (isIconVisible) {
@@ -210,7 +214,9 @@
 				}
 			} else {
 				if (this.buttonCreated && this.customButton) {
-					document.body.removeChild(this.customButton);
+					if (document.body.contains(this.customButton)) {
+						document.body.removeChild(this.customButton);
+					}
 					this.customButton = null;
 					this.buttonCreated = false;
 				}
@@ -282,9 +288,18 @@
         clearInterval(this.iconInterval);
         this.iconInterval = null;
       }
+      if (this.buttonCheckInterval) {
+        clearInterval(this.buttonCheckInterval);
+        this.buttonCheckInterval = null;
+      }
       if (this.iconTimeouts) {
         this.iconTimeouts.forEach(timeout => clearTimeout(timeout));
         this.iconTimeouts = [];
+      }
+      if (this.customButton && document.body.contains(this.customButton)) {
+        document.body.removeChild(this.customButton);
+        this.customButton = null;
+        this.buttonCreated = false;
       }
       const styleElement = document.getElementById(CONFIG.STYLE_ID);
       if (styleElement) {
@@ -469,7 +484,7 @@
 	  content.style.display = 'flex';
 	  content.style.flexDirection = 'column';
 
-	  const logoUrl = 'https://plugins/ROSE-Launcher/assets/logo.png';
+	  const logoUrl = '/plugins/ROSE-Jade/assets/logo.png';
 		const testImg = new Image();
 		testImg.onload = () => {
 		  const logoBackground = document.createElement('div');

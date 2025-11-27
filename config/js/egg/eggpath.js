@@ -257,7 +257,7 @@
         `;
 
     const submitButton = document.createElement("button");
-    submitButton.textContent = " ";
+    submitButton.textContent = "Submit";
     submitButton.style.cssText = `
             flex: 1;
             padding: 12px;
@@ -323,12 +323,16 @@
         messageElement.style.color = "#0acb6a";
 
         await window.DataStore?.set("Jade-easter-egg-unlocked", "true");
-        loadEggPlugin();
+        await loadEggPlugin();
 
-        setTimeout(() => {
-          document.body.removeChild(modal);
+        const removeModalElement = () => {
+          if (document.body.contains(modal)) {
+            document.body.removeChild(modal);
+          }
           modalCreated = false;
-        }, 2000);
+        };
+
+        setTimeout(removeModalElement, 2000);
       } else {
         messageElement.textContent = "Incorrect";
         messageElement.style.color = "#cd5c5c";
@@ -338,7 +342,9 @@
     };
 
     const closeModal = () => {
-      document.body.removeChild(modal);
+      if (document.body.contains(modal)) {
+        document.body.removeChild(modal);
+      }
       modalCreated = false;
     };
 
@@ -380,7 +386,7 @@
     try {
       const isUnlocked = await window.DataStore.get("Jade-easter-egg-unlocked");
       if (isUnlocked === "true") {
-        loadEggPlugin();
+        await loadEggPlugin();
       }
     } catch (error) {}
   };

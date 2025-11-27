@@ -288,7 +288,7 @@ const initializeObserver = async () => {
 
         async loadPlugin(pluginName) {
             try {
-                const pluginModule = await import(`https://plugins/ROSE-Launcher/config/js/plugins/${pluginName}.js`);
+                const pluginModule = await import(`./config/js/plugins/${pluginName}.js`);
                 
                 if (pluginModule.default) {
                     new pluginModule.default();
@@ -302,7 +302,7 @@ const initializeObserver = async () => {
 
         async loadAddon(addonName) {
             try {
-                const addonModule = await import(`https://plugins/ROSE-Launcher/config/js/addons/${addonName}.js`);
+                const addonModule = await import(`./config/js/addons/${addonName}.js`);
                 
                 if (addonModule.default) {
                     new addonModule.default();
@@ -318,7 +318,7 @@ const initializeObserver = async () => {
             if (this.easterEggLoaded) return;
             
             try {
-                const easterEggModule = await import(`https://plugins/ROSE-Launcher/config/js/egg/eggpath.js`);
+                const easterEggModule = await import(`./config/js/egg/eggpath.js`);
                 
                 if (easterEggModule.default) {
                     new easterEggModule.default();

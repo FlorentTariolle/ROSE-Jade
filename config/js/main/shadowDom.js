@@ -1,7 +1,11 @@
 export function currentBorder(element) {
-    const root = element.shadowRoot;
-    const rootStyle = document.createElement("style");
-    rootStyle.textContent = `
+	const root = element.shadowRoot;
+	if (!root) {
+		return;
+	}
+
+	const rootStyle = document.createElement("style");
+	rootStyle.textContent = `
 		:host .regalia-emblem-container .regalia-emblem[ranked-tier="unranked"],
 		:host .regalia-emblem-container .regalia-emblem[ranked-tier="iron"],
 		:host .regalia-emblem-container .regalia-emblem[ranked-tier="bronze"],
@@ -16,6 +20,6 @@ export function currentBorder(element) {
 		{
 			background-image: var(--current-border);
 		}
-    `;
-    root.appendChild(rootStyle);
+	`;
+	root.appendChild(rootStyle);
 }

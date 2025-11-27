@@ -546,9 +546,14 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                 attributeFilter: ['style', 'class']
             });
 
-            video.onerror = () => {
-                const imageUrl = url.replace('-animated', '').replace('(Animated)', '').trim();
-                this.setCustomBackground(imageUrl, false).catch(() => {});
+            video.onerror = async () => {
+                let imageUrl = url.replace('-animated', '').replace('(Animated)', '').trim();
+                imageUrl = imageUrl.replace(/\.(webm|mp4|mov|avi)$/i, ".jpg");
+                try {
+                    await this.setCustomBackground(imageUrl, false);
+                } catch (error) {
+                    console.error("[BGCM] Failed to fallback to image background", error);
+                }
             };
 
             document.body.appendChild(video);
