@@ -74,7 +74,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                 hideModal: true,
                 muteSound: true
             };
-            this.init();
+            this.initPromise = this.init().catch(() => {});
         }
 
         async init() {
@@ -277,7 +277,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                 hideModal: true,
                 muteSound: true
             };
-            this.init();
+            this.initPromise = this.init().catch(() => {});
         }
 
         async init() {

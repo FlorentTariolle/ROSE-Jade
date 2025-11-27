@@ -3,6 +3,7 @@ let observerCreationCallbacks = { idCallbacks: {}, tagCallbacks: {}, classCallba
 let observerDeletionCallbacks = { idCallbacks: {}, tagCallbacks: {}, classCallbacks: {} }
 let processedElements = new Set()
 let elementIds = new WeakMap()
+let periodicCheckIntervalId = null
 
 function observerSubscribeToElement(target, callback, callbackList) {
   function push(target, callback, observerMap) {
@@ -127,6 +128,10 @@ function observerCallback(mutationsList) {
 }
 
 function periodicElementCheck() {
+  if (!observerObject) {
+    return
+  }
+
   const currentElements = Array.from(document.querySelectorAll('*'))
   const newProcessedElements = new Set()
   
@@ -146,7 +151,26 @@ function periodicElementCheck() {
   }
 }
 
+function startPeriodicCheck() {
+  if (periodicCheckIntervalId !== null) {
+    return
+  }
+
+  periodicCheckIntervalId = setInterval(periodicElementCheck, 5000)
+}
+
+function stopPeriodicCheck() {
+  if (periodicCheckIntervalId === null) {
+    return
+  }
+
+  clearInterval(periodicCheckIntervalId)
+  periodicCheckIntervalId = null
+}
+
 function initializeObserver() {
+  stopPeriodicCheck()
+
   if (observerObject) {
     observerObject.disconnect()
   }
@@ -158,6 +182,8 @@ function initializeObserver() {
   for (const element of allElements) {
     observerHandleElement(element, true, observerCreationCallbacks)
   }
+
+  startPeriodicCheck()
 }
 
 if (document.readyState === 'loading') {
@@ -165,5 +191,3 @@ if (document.readyState === 'loading') {
 } else {
   initializeObserver()
 }
-
-setInterval(periodicElementCheck, 5000)

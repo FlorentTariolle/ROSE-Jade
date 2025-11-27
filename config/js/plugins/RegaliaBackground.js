@@ -99,14 +99,16 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             this.settings = {
                 blurAmount: 5
             };
+            this.customBackgroundsCache = [];
             this.initializationPromise = this.init().catch(() => {});
         }
 
         async init() {
             await this.loadSettings();
             await this.loadData();
+            await this.loadCustomBackgrounds();
             this.buttonContainerObserver();
-            this.applyCustomBackground();
+            await this.applyCustomBackground();
             this.setupChampionSelectObserver();
             
             if (window.DataStore) {
@@ -120,17 +122,40 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 
         async loadSettings() {
             const savedSettings = await window.DataStore?.get("bgcm-settings");
-        if (savedSettings) {
-            try {
-                const parsed = JSON.parse(savedSettings);
-                this.settings.blurAmount = parsed.blurAmount ?? 5;
-            } catch (e) {}
-        }
+            if (savedSettings) {
+                try {
+                    const parsed = JSON.parse(savedSettings);
+                    this.settings.blurAmount = parsed.blurAmount ?? 5;
+                } catch (e) {}
+            }
         }
 
         saveSettings() {
             if (window.DataStore) {
                 window.DataStore.set("bgcm-settings", JSON.stringify(this.settings));
+            }
+        }
+
+        async loadCustomBackgrounds() {
+            try {
+                const raw = await window.DataStore?.get("customBackgrounds");
+                if (!raw) {
+                    this.customBackgroundsCache = [];
+                    return;
+                }
+                if (Array.isArray(raw)) {
+                    this.customBackgroundsCache = raw;
+                } else if (typeof raw === "string") {
+                    try {
+                        this.customBackgroundsCache = JSON.parse(raw);
+                    } catch {
+                        this.customBackgroundsCache = [];
+                    }
+                } else {
+                    this.customBackgroundsCache = [];
+                }
+            } catch {
+                this.customBackgroundsCache = [];
             }
         }
 
@@ -390,7 +415,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             return skins;
         }
 
-        setCustomBackground(url, isAnimated = false, skinId = null) {
+        async setCustomBackground(url, isAnimated = false, skinId = null) {
             if (this.isChampionSelectActive) return;
             
             this.removeCustomBackground();
@@ -404,11 +429,11 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             }
             
             if (window.DataStore) {
-                window.DataStore.set('bgcm-selected-background', url);
-                window.DataStore.set('bgcm-background-type', this.currentBackgroundType);
+                await window.DataStore.set('bgcm-selected-background', url);
+                await window.DataStore.set('bgcm-background-type', this.currentBackgroundType);
                 if (skinId) {
                     selectedSkinId = skinId;
-                    window.DataStore.set('bgcm-selected-skin-id', skinId);
+                    await window.DataStore.set('bgcm-selected-skin-id', skinId);
                 }
             }
         }
@@ -523,7 +548,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 
             video.onerror = () => {
                 const imageUrl = url.replace('-animated', '').replace('(Animated)', '').trim();
-                this.setCustomBackground(imageUrl, false);
+                this.setCustomBackground(imageUrl, false).catch(() => {});
             };
 
             document.body.appendChild(video);
@@ -599,7 +624,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             const backgroundType = (await window.DataStore?.get('bgcm-background-type')) || 'image';
             
             if (savedBackground) {
-                this.setCustomBackground(savedBackground, backgroundType === 'video');
+                await this.setCustomBackground(savedBackground, backgroundType === 'video');
             }
         }
 
@@ -663,7 +688,9 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                 previewGroups.push(tftGroup);
             }
 
-            const customBackgrounds = window.DataStore?.get("customBackgrounds") || [];
+            const customBackgrounds = Array.isArray(this.customBackgroundsCache)
+                ? this.customBackgroundsCache
+                : [];
             const customGroup = {
                 title: "Custom Background",
                 items: customBackgrounds.map((item, index) => ({
@@ -803,7 +830,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             content.style.display = 'flex';
             content.style.flexDirection = 'column';
 
-            const logoUrl = 'https://plugins/ROSE-Jade/assets/logo.png';
+            const logoUrl = '/plugins/ROSE-Jade/assets/logo.png';
             const testImg = new Image();
             testImg.onload = () => {
                 const logoBackground = document.createElement('div');
@@ -1341,7 +1368,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                         (item.splashVideoPath || item.splashPath) : 
                         (item.splashPath || item.uncenteredSplashPath || item.tilePath);
                         
-                        this.setCustomBackground(backgroundUrl, item.isAnimated, item.id);
+                        await this.setCustomBackground(backgroundUrl, item.isAnimated, item.id);
                         
                         setTimeout(() => {
                             if (document.body.contains(document.getElementById(CONFIG.MODAL_ID))) {
@@ -1399,13 +1426,13 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 			this.init();
 		}
 
-		init() {
-			this.loadSettings();
+		async init() {
+			await this.loadSettings();
 			this.initializeSettings();
 		}
 
-		loadSettings() {
-			const savedSettings = window.DataStore?.get("bgcm-settings");
+		async loadSettings() {
+			const savedSettings = await window.DataStore?.get("bgcm-settings");
 			if (savedSettings) {
 				try {
 					const parsed = JSON.parse(savedSettings);
@@ -1552,6 +1579,20 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 						slider.value = value;
 					};
 
+					const cleanupDragging = () => {
+						if (!isDragging) return;
+
+						isDragging = false;
+						updateHoverEffects();
+
+						button.style.transition = 'left 0.1s ease-out, background-position 0.2s ease';
+						fill.style.transition = 'width 0.1s ease-out, background 0.2s ease';
+
+						document.removeEventListener('mousemove', handleMouseMove);
+						document.removeEventListener('mouseup', cleanupDragging);
+						document.removeEventListener('mouseleave', cleanupDragging);
+					};
+
 					button.addEventListener('mousedown', (e) => {
 						isDragging = true;
 						updateHoverEffects();
@@ -1561,15 +1602,8 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 						fill.style.transition = 'none';
 						
 						document.addEventListener('mousemove', handleMouseMove);
-						document.addEventListener('mouseup', () => {
-							isDragging = false;
-							updateHoverEffects();
-							
-							button.style.transition = 'left 0.1s ease-out, background-position 0.2s ease';
-							fill.style.transition = 'width 0.1s ease-out, background 0.2s ease';
-							
-							document.removeEventListener('mousemove', handleMouseMove);
-						}, { once: true });
+						document.addEventListener('mouseup', cleanupDragging);
+						document.addEventListener('mouseleave', cleanupDragging);
 					});
 
 					const track = document.querySelector('.bgcm-settings .lol-uikit-slider-base-track');

@@ -111,7 +111,7 @@ let data = [
         winsDisplay: "胜利显示:",
         lossesDisplay: "失败显示:",
         winrateDisplay: "胜率显示:",
-		LoadingDisp: "Loading...",
+        LoadingDisp: "正在加载...",
         show: "显示",
         hide: "隐藏"
       },
@@ -158,10 +158,16 @@ let data = [
         const settings = await window.DataStore?.get("winlose-settings");
         if (settings) {
           const userSettings = JSON.parse(settings);
+          const queueTypes = LanguageManager.getQueueTypes();
+          const validatedQueue =
+            userSettings.selectedQueue && queueTypes[userSettings.selectedQueue]
+              ? userSettings.selectedQueue
+              : DEFAULT_CONFIG.selectedQueue;
+
           CONFIG = {
             ...DEFAULT_CONFIG,
             gamesCount: userSettings.gamesCount ?? DEFAULT_CONFIG.gamesCount,
-            selectedQueue: userSettings.selectedQueue ?? DEFAULT_CONFIG.selectedQueue,
+            selectedQueue: validatedQueue,
             kdaDisplay: userSettings.kdaDisplay ?? DEFAULT_CONFIG.kdaDisplay,
             winsDisplay: userSettings.winsDisplay ?? DEFAULT_CONFIG.winsDisplay,
             lossesDisplay: userSettings.lossesDisplay ?? DEFAULT_CONFIG.lossesDisplay,
@@ -356,7 +362,9 @@ let data = [
         `;
 
         const input = settingsContainer.querySelector("input");
-        input.addEventListener("change", this.handleSettingsChange.bind(this));
+        if (input) {
+          input.addEventListener("change", this.handleSettingsChange.bind(this));
+        }
 
         const queueDropdown = settingsContainer.querySelectorAll("lol-uikit-framed-dropdown")[0];
         const queueOptions = queueDropdown.querySelectorAll("lol-uikit-dropdown-option");
@@ -603,13 +611,16 @@ let data = [
 
       const stats = limitedGames.reduce(
         (acc, game) => {
-          const playerTeamId = game.participants[0].teamId;
-          const teamWin = game.teams[playerTeamId === 100 ? 0 : 1].win === "Win";
-          const player = game.participants[0];
+          if (!game) return acc;
+          const player = game.participants?.[0];
+          if (!player) return acc;
+          const team = game.teams?.find((t) => t.teamId === player.teamId);
+          if (!team) return acc;
 
-          const kills = player.stats.kills || 0;
-          const deaths = player.stats.deaths || 0;
-          const assists = player.stats.assists || 0;
+          const teamWin = team.win === "Win";
+          const kills = player.stats?.kills || 0;
+          const deaths = player.stats?.deaths || 0;
+          const assists = player.stats?.assists || 0;
 
           return {
             wins: acc.wins + (teamWin ? 1 : 0),

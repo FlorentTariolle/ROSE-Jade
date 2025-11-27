@@ -51,7 +51,7 @@
               addButtonToChallengesGrid(node);
             }
 
-            const challengesGrid = node.querySelector?.(".challenges-grid");
+            const challengesGrid = node.querySelector(".challenges-grid");
             if (
               challengesGrid &&
               !challengesGrid.querySelector(".easter-egg-button")
@@ -178,7 +178,7 @@
     content.style.display = "flex";
     content.style.flexDirection = "column";
 
-    const logoUrl = "https://plugins/ROSE-Jade/assets/logo.png";
+    const logoUrl = "/plugins/ROSE-Jade/assets/logo.png";
     const testImg = new Image();
     testImg.onload = () => {
       const logoBackground = document.createElement("div");
@@ -322,7 +322,7 @@
         messageElement.textContent = "Immortal...";
         messageElement.style.color = "#0acb6a";
 
-        await window.DataStore.set("Jade-easter-egg-unlocked", "true");
+        await window.DataStore?.set("Jade-easter-egg-unlocked", "true");
         loadEggPlugin();
 
         setTimeout(() => {
