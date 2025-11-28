@@ -956,35 +956,37 @@ const initializeObserver = async () => {
         }
     }
 
-    window.addEventListener("load", async () => {
-        // Log plugin loading
-        console.log(`${LOG_PREFIX} Plugin loading...`);
-        
-        // Initialize bridge connection first
-        try {
-            const bridgePortLoaded = await loadBridgePort();
-            if (bridgePortLoaded) {
-                setupBridgeSocket();
-                // Log will be sent once bridge connects
-            } else {
-                console.warn(`${LOG_PREFIX} Failed to load bridge port, retrying...`);
-                // Retry after a delay
-                setTimeout(async () => {
-                    const retrySuccess = await loadBridgePort();
-                    if (retrySuccess) {
-                        setupBridgeSocket();
-                    } else {
-                        console.error(`${LOG_PREFIX} Failed to initialize bridge connection after retry`);
-                    }
-                }, 2000);
-            }
-        } catch (error) {
-            console.error(`${LOG_PREFIX} Error initializing bridge connection:`, error);
-        }
-        
+    window.addEventListener("load", () => {
+        // Initialize settings panel FIRST (synchronously, like other plugins)
         settingsUtils(window, baseData);
+        
+        // Then initialize other things
         overrideNavigationTitles();
         new RosePlugin();
 		initializeObserver();
+        
+        // Initialize bridge connection asynchronously (doesn't block settings)
+        (async () => {
+            try {
+                const bridgePortLoaded = await loadBridgePort();
+                if (bridgePortLoaded) {
+                    setupBridgeSocket();
+                    // Log will be sent once bridge connects
+                } else {
+                    console.warn(`${LOG_PREFIX} Failed to load bridge port, retrying...`);
+                    // Retry after a delay
+                    setTimeout(async () => {
+                        const retrySuccess = await loadBridgePort();
+                        if (retrySuccess) {
+                            setupBridgeSocket();
+                        } else {
+                            console.error(`${LOG_PREFIX} Failed to initialize bridge connection after retry`);
+                        }
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error(`${LOG_PREFIX} Error initializing bridge connection:`, error);
+            }
+        })();
     });
 })();
