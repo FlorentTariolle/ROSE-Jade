@@ -11,18 +11,26 @@
               node.classList &&
               node.classList.contains("style-profile-overview-content")
             ) {
-              console.log(
-                "Sometimes, it only takes 5 letters to become immortal."
-              );
+              if (window.ROSEJadeLog) {
+                window.ROSEJadeLog('info', "Sometimes, it only takes 5 letters to become immortal.");
+              } else {
+                console.log(
+                  "Sometimes, it only takes 5 letters to become immortal."
+                );
+              }
             }
 
             const profileOverview = node.querySelector?.(
               ".style-profile-overview-content"
             );
             if (profileOverview) {
-              console.log(
-                "Sometimes, it only takes 5 letters to become immortal."
-              );
+              if (window.ROSEJadeLog) {
+                window.ROSEJadeLog('info', "Sometimes, it only takes 5 letters to become immortal.");
+              } else {
+                console.log(
+                  "Sometimes, it only takes 5 letters to become immortal."
+                );
+              }
             }
           }
         }
@@ -38,7 +46,11 @@
       ".style-profile-overview-content"
     );
     if (existingProfileOverview) {
-      console.log("Sometimes, it only takes 5 letters to become immortal.");
+      if (window.ROSEJadeLog) {
+        window.ROSEJadeLog('info', "Sometimes, it only takes 5 letters to become immortal.");
+      } else {
+        console.log("Sometimes, it only takes 5 letters to become immortal.");
+      }
     }
   };
 

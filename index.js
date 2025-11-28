@@ -5,6 +5,198 @@ import * as observer from './config/js/main/observer.js';
 import * as shadowDom from './config/js/main/shadowDom.js';
 import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Settings-Utils.js";
 
+const LOG_PREFIX = "[Rose-Jade]";
+const BRIDGE_PORT_STORAGE_KEY = "rose_bridge_port";
+const DISCOVERY_START_PORT = 50000;
+const DISCOVERY_END_PORT = 50010;
+
+// WebSocket bridge for logging
+let BRIDGE_PORT = 50000;
+let BRIDGE_URL = `ws://localhost:${BRIDGE_PORT}`;
+let bridgeSocket = null;
+let bridgeReady = false;
+let bridgeQueue = [];
+
+// Load bridge port with file-based discovery and localStorage caching
+async function loadBridgePort() {
+    try {
+        // First, check localStorage for cached port
+        const cachedPort = localStorage.getItem(BRIDGE_PORT_STORAGE_KEY);
+        if (cachedPort) {
+            const port = parseInt(cachedPort, 10);
+            if (!isNaN(port) && port > 0) {
+                // Verify cached port is still valid
+                try {
+                    const response = await fetch(`http://localhost:${port}/bridge-port`, {
+                        signal: AbortSignal.timeout(1000)
+                    });
+                    if (response.ok) {
+                        const portText = await response.text();
+                        const fetchedPort = parseInt(portText.trim(), 10);
+                        if (!isNaN(fetchedPort) && fetchedPort > 0) {
+                            BRIDGE_PORT = fetchedPort;
+                            BRIDGE_URL = `ws://localhost:${BRIDGE_PORT}`;
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    // Cached port invalid, continue to discovery
+                    localStorage.removeItem(BRIDGE_PORT_STORAGE_KEY);
+                }
+            }
+        }
+        
+        // Discovery: try /bridge-port endpoint on high ports (50000-50010)
+        for (let port = DISCOVERY_START_PORT; port <= DISCOVERY_END_PORT; port++) {
+            try {
+                const response = await fetch(`http://localhost:${port}/bridge-port`, {
+                    signal: AbortSignal.timeout(1000)
+                });
+                if (response.ok) {
+                    const portText = await response.text();
+                    const fetchedPort = parseInt(portText.trim(), 10);
+                    if (!isNaN(fetchedPort) && fetchedPort > 0) {
+                        BRIDGE_PORT = fetchedPort;
+                        BRIDGE_URL = `ws://localhost:${BRIDGE_PORT}`;
+                        // Cache the discovered port
+                        localStorage.setItem(BRIDGE_PORT_STORAGE_KEY, String(BRIDGE_PORT));
+                        return true;
+                    }
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+        
+        // Fallback: try old /port endpoint for backward compatibility
+        for (let port = DISCOVERY_START_PORT; port <= DISCOVERY_END_PORT; port++) {
+            try {
+                const response = await fetch(`http://localhost:${port}/port`, {
+                    signal: AbortSignal.timeout(1000)
+                });
+                if (response.ok) {
+                    const portText = await response.text();
+                    const fetchedPort = parseInt(portText.trim(), 10);
+                    if (!isNaN(fetchedPort) && fetchedPort > 0) {
+                        BRIDGE_PORT = fetchedPort;
+                        BRIDGE_URL = `ws://localhost:${BRIDGE_PORT}`;
+                        localStorage.setItem(BRIDGE_PORT_STORAGE_KEY, String(BRIDGE_PORT));
+                        return true;
+                    }
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+        
+        return false;
+    } catch (e) {
+        return false;
+    }
+}
+
+function log(level, message, data = null) {
+    const payload = {
+        type: "chroma-log",
+        source: "ROSE-Jade",
+        level: level,
+        message: message,
+        timestamp: Date.now(),
+    };
+    if (data) payload.data = data;
+    
+    const payloadStr = JSON.stringify(payload);
+    
+    if (bridgeReady && bridgeSocket && bridgeSocket.readyState === WebSocket.OPEN) {
+        try {
+            bridgeSocket.send(payloadStr);
+        } catch (error) {
+            console.error(`${LOG_PREFIX} Failed to send log via bridge:`, error);
+            bridgeQueue.push(payloadStr);
+        }
+    } else {
+        bridgeQueue.push(payloadStr);
+        // If queue is getting large and bridge isn't connecting, try to reconnect
+        if (bridgeQueue.length > 50 && !bridgeReady) {
+            console.warn(`${LOG_PREFIX} Log queue is large (${bridgeQueue.length}), bridge may not be connected`);
+        }
+    }
+    
+    // Also log to console for debugging
+    const consoleMethod = level === "error" ? console.error : level === "warn" ? console.warn : console.log;
+    consoleMethod(`${LOG_PREFIX} ${message}`, data || "");
+}
+
+function setupBridgeSocket() {
+    if (bridgeSocket && bridgeSocket.readyState === WebSocket.OPEN) {
+        return;
+    }
+    
+    try {
+        bridgeSocket = new WebSocket(BRIDGE_URL);
+        
+        bridgeSocket.onopen = () => {
+            bridgeReady = true;
+            const queueLength = bridgeQueue.length;
+            flushBridgeQueue();
+            // Send connection log
+            log("info", `WebSocket bridge connected (flushed ${queueLength} queued messages)`);
+            console.log(`${LOG_PREFIX} Bridge connected, logging to terminal enabled`);
+        };
+        
+        bridgeSocket.onmessage = (event) => {
+            try {
+                const payload = JSON.parse(event.data);
+                // Handle any incoming messages if needed
+            } catch (e) {
+                log("error", "Failed to parse bridge message", { error: e.message });
+            }
+        };
+        
+        bridgeSocket.onerror = (error) => {
+            log("warn", "WebSocket bridge error", { error: error.message || "Unknown error" });
+        };
+        
+        bridgeSocket.onclose = () => {
+            log("info", "WebSocket bridge closed, reconnecting...");
+            bridgeReady = false;
+            bridgeSocket = null;
+            scheduleBridgeRetry();
+        };
+    } catch (e) {
+        log("error", "Failed to setup WebSocket bridge", { error: e.message });
+        scheduleBridgeRetry();
+    }
+}
+
+function scheduleBridgeRetry() {
+    setTimeout(() => {
+        if (!bridgeReady) {
+            setupBridgeSocket();
+        }
+    }, 3000);
+}
+
+function flushBridgeQueue() {
+    if (!bridgeSocket || bridgeSocket.readyState !== WebSocket.OPEN) {
+        return;
+    }
+    
+    while (bridgeQueue.length) {
+        const payload = bridgeQueue.shift();
+        try {
+            bridgeSocket.send(payload);
+        } catch (error) {
+            log("warn", "Bridge flush failed", { error: error.message });
+            bridgeQueue.unshift(payload);
+            break;
+        }
+    }
+}
+
+// Make logging function available globally for sub-modules
+window.ROSEJadeLog = log;
+
 const initializeObserver = async () => {
     try {
         if (observer && typeof observer.subscribeToElementCreation === 'function') {
@@ -12,7 +204,11 @@ const initializeObserver = async () => {
                 shadowDom.currentBorder(element);
             });
         }
-    } catch (error) {}
+    } catch (error) {
+        if (window.ROSEJadeLog) {
+            window.ROSEJadeLog("error", "Failed to initialize observer", { error: error.message });
+        }
+    }
 };
 
 (() => {
@@ -250,6 +446,10 @@ const initializeObserver = async () => {
         }
 
         async init() {
+            // Test log to verify logging is working
+            if (window.ROSEJadeLog) {
+                window.ROSEJadeLog("info", "ROSE-Jade plugin initializing");
+            }
             await SettingsStore.loadSettings();
             this.initializeSettings();
             
@@ -756,7 +956,32 @@ const initializeObserver = async () => {
         }
     }
 
-    window.addEventListener("load", () => {
+    window.addEventListener("load", async () => {
+        // Log plugin loading
+        console.log(`${LOG_PREFIX} Plugin loading...`);
+        
+        // Initialize bridge connection first
+        try {
+            const bridgePortLoaded = await loadBridgePort();
+            if (bridgePortLoaded) {
+                setupBridgeSocket();
+                // Log will be sent once bridge connects
+            } else {
+                console.warn(`${LOG_PREFIX} Failed to load bridge port, retrying...`);
+                // Retry after a delay
+                setTimeout(async () => {
+                    const retrySuccess = await loadBridgePort();
+                    if (retrySuccess) {
+                        setupBridgeSocket();
+                    } else {
+                        console.error(`${LOG_PREFIX} Failed to initialize bridge connection after retry`);
+                    }
+                }, 2000);
+            }
+        } catch (error) {
+            console.error(`${LOG_PREFIX} Error initializing bridge connection:`, error);
+        }
+        
         settingsUtils(window, baseData);
         overrideNavigationTitles();
         new RosePlugin();

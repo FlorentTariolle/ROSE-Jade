@@ -552,7 +552,11 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
                 try {
                     await this.setCustomBackground(imageUrl, false);
                 } catch (error) {
-                    console.error("[BGCM] Failed to fallback to image background", error);
+                    if (window.ROSEJadeLog) {
+                        window.ROSEJadeLog('error', "[BGCM] Failed to fallback to image background", { error: error.message || error });
+                    } else {
+                        console.error("[BGCM] Failed to fallback to image background", error);
+                    }
                 }
             };
 

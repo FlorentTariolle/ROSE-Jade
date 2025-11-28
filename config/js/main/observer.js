@@ -56,7 +56,11 @@ function observerHandleElement(element, isNew, callbacks) {
         try {
           obj(element)
         } catch (error) {
-          console.error('Error in creation callback for id', element.id, error)
+          if (window.ROSEJadeLog) {
+            window.ROSEJadeLog('error', 'Error in creation callback for id', { id: element.id, error: error.message || error })
+          } else {
+            console.error('Error in creation callback for id', element.id, error)
+          }
         }
       }
     }
@@ -69,7 +73,11 @@ function observerHandleElement(element, isNew, callbacks) {
       try {
         obj(element)
       } catch (error) {
-        console.error('Error in creation callback for tag', tagLowered, error)
+        if (window.ROSEJadeLog) {
+          window.ROSEJadeLog('error', 'Error in creation callback for tag', { tag: tagLowered, error: error.message || error })
+        } else {
+          console.error('Error in creation callback for tag', tagLowered, error)
+        }
       }
     }
   }
@@ -84,7 +92,11 @@ function observerHandleElement(element, isNew, callbacks) {
           try {
             obj(element)
           } catch (error) {
-            console.error('Error in creation callback for class', classLowered, error)
+            if (window.ROSEJadeLog) {
+              window.ROSEJadeLog('error', 'Error in creation callback for class', { class: classLowered, error: error.message || error })
+            } else {
+              console.error('Error in creation callback for class', classLowered, error)
+            }
           }
         }
       }
