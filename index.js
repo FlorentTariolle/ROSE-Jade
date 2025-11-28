@@ -318,7 +318,7 @@ const initializeObserver = async () => {
             en: {
                 pluginSettings: "Plugin Settings",
                 restartRequired: "Restart Required!",
-                restartRequiredDesc: "Changes will take effect after the client is restarting",
+                restartRequiredDesc: "Changes will take effect after restarting the client",
                 borderDesc: "Enable Border changes",
                 backgroundDesc: "Enable Background changes", 
                 bannerDesc: "Enable Banner changes",
@@ -814,16 +814,6 @@ const initializeObserver = async () => {
                                 </div>
                             </div>
 
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: thin solid #3c3c41;">
-                                <lol-uikit-flat-checkbox ${CONFIG.addonBckChangerEnabled ? 'class="checked"' : ''} style="margin-right: 15px;">
-                                    <input slot="input" type="checkbox" ${CONFIG.addonBckChangerEnabled ? 'checked' : ''}>
-                                </lol-uikit-flat-checkbox>
-                                <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-                                    <p class="lol-settings-window-size-text" style="margin: 0; font-size: 12px; color: #a09b8c;">
-                                        ${LanguageManager.t('addonBckChangerDesc')}
-                                    </p>
-                                </div>
-                            </div>
 
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
                                 <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
@@ -987,10 +977,6 @@ const initializeObserver = async () => {
                 if (checkboxes[2]) {
                     checkboxes[2].id = 'lobbyBttnCheckbox';
                     checkboxHandler('lobbyBttnCheckbox', 'addonLobbyBttnEnabled');
-                }
-                if (checkboxes[3]) {
-                    checkboxes[3].id = 'bckChangerCheckbox';
-                    checkboxHandler('bckChangerCheckbox', 'addonBckChangerEnabled');
                 }
             }, 100);
 
