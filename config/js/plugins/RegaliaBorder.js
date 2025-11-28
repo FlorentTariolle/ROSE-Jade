@@ -1,6 +1,6 @@
 (() => {
   const CONFIG = {
-    API_URL: "/plugins/ROSE-Jade/API/border.json",
+    API_URL: "/plugin/ROSE-Jade/API/border.json",
     MODAL_ID: "regalia.border-modal",
     DATASTORE_KEY: "regalia.border-datastore"
   };
@@ -36,7 +36,11 @@
       this._frozen = false;
       this._applying = false;
       this.originalDivisions = new WeakMap();
+      if (window.ROSEJadeLog) {
+        window.ROSEJadeLog('info', 'RegaliaBorder plugin initializing');
+      }
       this.startObserver();
+      this.loadBordersFromAPI();
     }
 
     freeze() {
@@ -235,6 +239,16 @@
     async loadBordersFromAPI() {
       try {
         const response = await fetch(CONFIG.API_URL);
+        if (!response.ok) {
+          if (window.ROSEJadeLog) {
+            window.ROSEJadeLog('error', 'Failed to load borders from API', { 
+              status: response.status, 
+              statusText: response.statusText,
+              url: CONFIG.API_URL 
+            });
+          }
+          return;
+        }
         const bordersData = await response.json();
         
         this.borderList = bordersData.map(border => {
@@ -251,7 +265,21 @@
           };
         });
         
-      } catch (error) {}
+        if (window.ROSEJadeLog) {
+          window.ROSEJadeLog('info', 'Borders loaded from API', { 
+            count: this.borderList.length,
+            types: [...new Set(this.borderList.map(b => b.crestType))]
+          });
+        }
+        
+      } catch (error) {
+        if (window.ROSEJadeLog) {
+          window.ROSEJadeLog('error', 'Error loading borders from API', { 
+            error: error.message || error,
+            url: CONFIG.API_URL 
+          });
+        }
+      }
     }
       
     getPreviewPath(assetPath) {
@@ -597,10 +625,18 @@
         });
 
         if (filteredBorders.length === 0) {
+          const errorMessage = `No ${this.currentTab} borders found`;
+          if (window.ROSEJadeLog) {
+            window.ROSEJadeLog('warn', errorMessage, { 
+              tab: this.currentTab, 
+              totalBorders: this.borderList.length,
+              borderTypes: [...new Set(this.borderList.map(b => b.crestType))]
+            });
+          }
           list.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
               <p style="color: #e63946; font-size: 16px; margin: 0;">NOT FOUND 404</p>
-              <p style="color: #3a6158; font-size: 12px; margin: 10px 0 0 0;">No ${this.currentTab} borders found</p>
+              <p style="color: #3a6158; font-size: 12px; margin: 10px 0 0 0;">${errorMessage}</p>
             </div>
           `;
           return;
@@ -672,6 +708,12 @@
               resolve();
             };
             borderImg.onerror = () => {
+              if (window.ROSEJadeLog) {
+                window.ROSEJadeLog('warn', 'Failed to load border image', { 
+                  borderId: border.id,
+                  previewPath: border.previewPath 
+                });
+              }
               resolve();
             };
             borderImg.src = border.previewPath;
@@ -680,7 +722,14 @@
 
         await Promise.all(borderPromises);
 
-      } catch (error) {}
+      } catch (error) {
+        if (window.ROSEJadeLog) {
+          window.ROSEJadeLog('error', 'Error loading borders into modal', { 
+            error: error.message || error,
+            tab: this.currentTab 
+          });
+        }
+      }
     }
   }
   
