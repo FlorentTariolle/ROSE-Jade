@@ -199,7 +199,10 @@ const initializeObserver = async () => {
     try {
         if (observer && typeof observer.subscribeToElementCreation === 'function') {
             observer.subscribeToElementCreation('lol-regalia-emblem-element', (element) => {
-                shadowDom.currentBorder(element);
+                // Only apply border style if border plugin is enabled
+                if (window.CONFIG && window.CONFIG.regaliaBorderEnabled) {
+                    shadowDom.currentBorder(element);
+                }
             });
         }
     } catch (error) {
@@ -409,11 +412,13 @@ const initializeObserver = async () => {
                         regaliaIconEnabled: userSettings.regaliaIconEnabled ?? DEFAULT_CONFIG.regaliaIconEnabled,
                         regaliaTitleEnabled: userSettings.regaliaTitleEnabled ?? DEFAULT_CONFIG.regaliaTitleEnabled,
                         addonAAEnabled: userSettings.addonAAEnabled ?? DEFAULT_CONFIG.addonAAEnabled,
-						addonWinLose: userSettings.addonWinLose ?? DEFAULT_CONFIG.addonWinLose,
+                        addonWinLose: userSettings.addonWinLose ?? DEFAULT_CONFIG.addonWinLose,
                         addonLobbyBttnEnabled: userSettings.addonLobbyBttnEnabled ?? DEFAULT_CONFIG.addonLobbyBttnEnabled,
                         addonBckChangerEnabled: userSettings.addonBckChangerEnabled ?? DEFAULT_CONFIG.addonBckChangerEnabled,
                         easterEggEnabled: userSettings.easterEggEnabled ?? DEFAULT_CONFIG.easterEggEnabled
                     };
+                    // Update global CONFIG reference
+                    window.CONFIG = CONFIG;
                 }
             } catch (error) {}
         },
@@ -449,6 +454,8 @@ const initializeObserver = async () => {
                 window.ROSEJadeLog("info", "ROSE-Jade plugin initializing");
             }
             await SettingsStore.loadSettings();
+            // Expose CONFIG globally so plugins can check their enabled state
+            window.CONFIG = CONFIG;
             this.initializeSettings();
             
             // Apply unified effect only if background plugin is enabled
@@ -861,6 +868,10 @@ const initializeObserver = async () => {
                     checkbox.addEventListener('change', (e) => {
                         const wasEnabled = CONFIG[configKey];
                         CONFIG[configKey] = e.target.checked;
+                        // Update global CONFIG reference
+                        if (window.CONFIG) {
+                            window.CONFIG[configKey] = e.target.checked;
+                        }
                         SettingsStore.saveSettings();
                         
                         // Handle unified effect for background plugin
@@ -877,6 +888,24 @@ const initializeObserver = async () => {
                                 } else if (window.Effect && typeof window.Effect.apply === 'function') {
                                     // Fallback: apply transparent effect to clear it
                                     window.Effect.apply('unified', { color: "#00000000" });
+                                }
+                            }
+                        }
+                        
+                        // Handle border plugin enable/disable
+                        if (configKey === 'regaliaBorderEnabled') {
+                            if (window.RegaliaBorder) {
+                                if (e.target.checked && !wasEnabled) {
+                                    // Enable border plugin
+                                    window.RegaliaBorder.enabled = true;
+                                    window.RegaliaBorder.startObserver();
+                                } else if (!e.target.checked && wasEnabled) {
+                                    // Disable border plugin - stop observer and revert borders
+                                    window.RegaliaBorder.stop();
+                                    // Remove border styles from shadow DOMs
+                                    if (shadowDom && typeof shadowDom.removeBorderStyles === 'function') {
+                                        shadowDom.removeBorderStyles();
+                                    }
                                 }
                             }
                         }

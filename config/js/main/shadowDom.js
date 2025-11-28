@@ -4,7 +4,13 @@ export function currentBorder(element) {
 		return;
 	}
 
+	// Only inject style if border plugin is enabled
+	if (window.CONFIG && !window.CONFIG.regaliaBorderEnabled) {
+		return;
+	}
+
 	const rootStyle = document.createElement("style");
+	rootStyle.className = "jade-border-style"; // Add class for easy removal
 	rootStyle.textContent = `
 		:host .regalia-emblem-container .regalia-emblem[ranked-tier="unranked"],
 		:host .regalia-emblem-container .regalia-emblem[ranked-tier="iron"],
@@ -18,8 +24,21 @@ export function currentBorder(element) {
 		:host .regalia-emblem-container .regalia-emblem[ranked-tier="grandmaster"],
 		:host .regalia-emblem-container .regalia-emblem[ranked-tier="challenger"]
 		{
-			background-image: var(--current-border);
+			background-image: var(--current-border, unset);
 		}
 	`;
 	root.appendChild(rootStyle);
+}
+
+// Function to remove border styles when plugin is disabled
+export function removeBorderStyles() {
+	const elements = document.querySelectorAll('lol-regalia-emblem-element');
+	elements.forEach(element => {
+		if (element.shadowRoot) {
+			const style = element.shadowRoot.querySelector('style.jade-border-style');
+			if (style) {
+				style.remove();
+			}
+		}
+	});
 }

@@ -37,11 +37,20 @@
       this._applying = false;
       this.originalDivisions = new WeakMap();
       this.bridgePort = null;
+      this.checkInterval = null;
+      // Check if plugin is enabled in config (if available)
+      // Default to true if config is not available (for backward compatibility)
+      this.enabled = (window.CONFIG && window.CONFIG.regaliaBorderEnabled !== undefined) 
+        ? window.CONFIG.regaliaBorderEnabled 
+        : true;
       if (window.ROSEJadeLog) {
-        window.ROSEJadeLog('info', 'RegaliaBorder plugin initializing');
+        window.ROSEJadeLog('info', 'RegaliaBorder plugin initializing', { enabled: this.enabled });
       }
       this.loadBridgePort().then(() => {
-        this.startObserver();
+        // Only start observer if plugin is enabled
+        if (this.enabled) {
+          this.startObserver();
+        }
         this.loadBordersFromAPI();
       });
     }
@@ -123,7 +132,21 @@
       if (borderData && borderData.crestType === 'ranked' && borderData.previewPath) {
         document.documentElement.style.setProperty('--current-border', `url('${borderData.previewPath}')`);
       } else {
+        // Remove the CSS variable to allow client to use default ranked borders
         document.documentElement.style.removeProperty('--current-border');
+        // Also remove any inline background-image styles we may have set on elements
+        const crestElements = this.findAllCrestElements();
+        crestElements.forEach((crestElement) => {
+          try {
+            if (crestElement.style && crestElement.style.backgroundImage) {
+              // Only remove if it's our custom border
+              const bgImage = crestElement.style.backgroundImage;
+              if (bgImage.includes('--current-border') || bgImage.includes('plugins/ROSE-Jade')) {
+                crestElement.style.removeProperty('background-image');
+              }
+            }
+          } catch (e) {}
+        });
       }
     }
 
@@ -189,7 +212,14 @@
     }
 
     startObserver() {
-      const checkInterval = setInterval(() => {
+      // Clear any existing interval
+      if (this.checkInterval) {
+        clearInterval(this.checkInterval);
+      }
+      
+      this.checkInterval = setInterval(() => {
+        // Don't do anything if plugin is disabled
+        if (!this.enabled) return;
         if (this._frozen) return;
         
         const isPlayerActive = this.isPlayerActive();
@@ -219,6 +249,106 @@
           }
         }
       }, 850);
+    }
+    
+    stop() {
+      // Stop the observer
+      if (this.checkInterval) {
+        clearInterval(this.checkInterval);
+        this.checkInterval = null;
+      }
+      
+      // Remove custom button if it exists
+      if (this.customButton && document.body.contains(this.customButton)) {
+        document.body.removeChild(this.customButton);
+        this.customButton = null;
+        this.buttonCreated = false;
+      }
+      
+      // Revert all border changes
+      this.revertBorder();
+      
+      // Restore all original divisions and disconnect observers
+      if (this.borderObservers) {
+        this.borderObservers.forEach((observer, crestElement) => {
+          try {
+            observer.disconnect();
+            delete crestElement._borderReplaced;
+            this.restoreOriginalDivision(crestElement);
+          } catch (e) {}
+        });
+        this.borderObservers.clear();
+      }
+      
+      // Find all crest elements and remove custom attributes we may have set
+      // This allows the client to restore the original ranked borders
+      const crestElements = this.findAllCrestElements();
+      crestElements.forEach((crestElement) => {
+        try {
+          // Remove custom attributes - the client will restore original values
+          // We need to remove the attributes we set so the client can restore defaults
+          if (crestElement.hasAttribute('prestige-crest-id')) {
+            const currentId = crestElement.getAttribute('prestige-crest-id');
+            // If it's a non-numeric ID (our custom borders), remove it
+            // Numeric IDs are original client values, so we keep those
+            if (currentId && !currentId.match(/^\d+$/)) {
+              crestElement.removeAttribute('prestige-crest-id');
+            }
+          }
+          if (crestElement.hasAttribute('crest-type')) {
+            const currentType = crestElement.getAttribute('crest-type');
+            // Remove if it's a type we set (prestige or ranked from our custom borders)
+            // The client will restore the original type
+            if (currentType === 'prestige' || currentType === 'ranked') {
+              crestElement.removeAttribute('crest-type');
+            }
+          }
+          if (crestElement.hasAttribute('ranked-tier')) {
+            const currentTier = crestElement.getAttribute('ranked-tier');
+            // If it's empty (we cleared it) or a custom tier, remove it
+            // The client will restore the original tier
+            if (currentTier === '' || !currentTier.match(/^(IRON|BRONZE|SILVER|GOLD|PLATINUM|EMERALD|DIAMOND|MASTER|GRANDMASTER|CHALLENGER)$/i)) {
+              crestElement.removeAttribute('ranked-tier');
+            }
+          }
+          // Restore original division
+          this.restoreOriginalDivision(crestElement);
+        } catch (e) {}
+      });
+      
+      // Also check in shadow DOMs
+      const customizerElement = document.querySelector('lol-regalia-identity-customizer-element');
+      if (customizerElement && customizerElement.shadowRoot) {
+        const customizerCrest = customizerElement.shadowRoot.querySelector('lol-regalia-crest-v2-element.regalia-identity-customizer-crest-element');
+        if (customizerCrest) {
+          try {
+            if (customizerCrest.hasAttribute('prestige-crest-id')) {
+              const currentId = customizerCrest.getAttribute('prestige-crest-id');
+              if (currentId && !currentId.match(/^\d+$/)) {
+                customizerCrest.removeAttribute('prestige-crest-id');
+              }
+            }
+            if (customizerCrest.hasAttribute('crest-type')) {
+              const currentType = customizerCrest.getAttribute('crest-type');
+              if (currentType === 'prestige' || currentType === 'ranked') {
+                customizerCrest.removeAttribute('crest-type');
+              }
+            }
+            if (customizerCrest.hasAttribute('ranked-tier')) {
+              const currentTier = customizerCrest.getAttribute('ranked-tier');
+              if (currentTier === '' || !currentTier.match(/^(IRON|BRONZE|SILVER|GOLD|PLATINUM|EMERALD|DIAMOND|MASTER|GRANDMASTER|CHALLENGER)$/i)) {
+                customizerCrest.removeAttribute('ranked-tier');
+              }
+            }
+            this.restoreOriginalDivision(customizerCrest);
+          } catch (e) {}
+        }
+      }
+      
+      // Clear CSS custom property
+      this.setCurrentBorderCSS(null);
+      
+      this.enabled = false;
     }
 
     isBorderContainerVisible() {
@@ -370,6 +500,8 @@
     }
 
     async applyCustomBorder() {
+		// Don't apply if plugin is disabled
+		if (!this.enabled) return;
 		if (this._frozen || this._applying) return;
 		this._applying = true;
 		
