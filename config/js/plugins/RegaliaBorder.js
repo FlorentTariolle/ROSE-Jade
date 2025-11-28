@@ -1,6 +1,6 @@
 (() => {
   const CONFIG = {
-    API_URL: "/plugin/ROSE-Jade/API/border.json",
+    API_URL: "/plugins/ROSE-Jade/API/border.json",
     MODAL_ID: "regalia.border-modal",
     DATASTORE_KEY: "regalia.border-datastore"
   };
@@ -36,11 +36,59 @@
       this._frozen = false;
       this._applying = false;
       this.originalDivisions = new WeakMap();
+      this.bridgePort = null;
       if (window.ROSEJadeLog) {
         window.ROSEJadeLog('info', 'RegaliaBorder plugin initializing');
       }
-      this.startObserver();
-      this.loadBordersFromAPI();
+      this.loadBridgePort().then(() => {
+        this.startObserver();
+        this.loadBordersFromAPI();
+      });
+    }
+
+    async loadBridgePort() {
+      try {
+        // Try to get bridge port from localStorage first
+        const cachedPort = localStorage.getItem('rose_bridge_port');
+        if (cachedPort) {
+          const port = parseInt(cachedPort, 10);
+          if (!isNaN(port) && port > 0) {
+            try {
+              const response = await fetch(`http://localhost:${port}/bridge-port`, {
+                signal: AbortSignal.timeout(1000)
+              });
+              if (response.ok) {
+                this.bridgePort = port;
+                return;
+              }
+            } catch (e) {
+              // Cached port invalid, continue to discovery
+            }
+          }
+        }
+        
+        // Discovery: try /bridge-port endpoint on high ports (50000-50010)
+        for (let port = 50000; port <= 50010; port++) {
+          try {
+            const response = await fetch(`http://localhost:${port}/bridge-port`, {
+              signal: AbortSignal.timeout(1000)
+            });
+            if (response.ok) {
+              const portText = await response.text();
+              const fetchedPort = parseInt(portText.trim(), 10);
+              if (!isNaN(fetchedPort) && fetchedPort > 0) {
+                this.bridgePort = fetchedPort;
+                localStorage.setItem('rose_bridge_port', String(fetchedPort));
+                return;
+              }
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+      } catch (e) {
+        // Failed to load bridge port
+      }
     }
 
     freeze() {
@@ -238,39 +286,51 @@
 
     async loadBordersFromAPI() {
       try {
-        const response = await fetch(CONFIG.API_URL);
+        // Try to load from bridge server first if available
+        let apiUrl = CONFIG.API_URL;
+        if (this.bridgePort) {
+          apiUrl = `http://localhost:${this.bridgePort}/plugin/ROSE-Jade/API/border.json`;
+        }
+        
+        const response = await fetch(apiUrl);
         if (!response.ok) {
+          // Fallback to direct path if bridge server fails
+          if (this.bridgePort && apiUrl.includes('localhost')) {
+            if (window.ROSEJadeLog) {
+              window.ROSEJadeLog('warn', 'Failed to load borders from bridge server, trying direct path', { 
+                status: response.status,
+                bridgeUrl: apiUrl
+              });
+            }
+            const directResponse = await fetch(CONFIG.API_URL);
+            if (!directResponse.ok) {
+              if (window.ROSEJadeLog) {
+                window.ROSEJadeLog('error', 'Failed to load borders from API', { 
+                  status: directResponse.status, 
+                  statusText: directResponse.statusText,
+                  url: CONFIG.API_URL,
+                  bridgeUrl: apiUrl
+                });
+              }
+              return;
+            }
+            // Use direct response
+            const bordersData = await directResponse.json();
+            this.processBordersData(bordersData);
+            return;
+          }
+          
           if (window.ROSEJadeLog) {
             window.ROSEJadeLog('error', 'Failed to load borders from API', { 
               status: response.status, 
               statusText: response.statusText,
-              url: CONFIG.API_URL 
+              url: apiUrl 
             });
           }
           return;
         }
         const bordersData = await response.json();
-        
-        this.borderList = bordersData.map(border => {
-          const uniqueId = border["ranked-tier"] ? 
-            `${border.id}-${border["ranked-tier"]}` : 
-            border.id;
-          
-          return {
-            id: border.id,
-            uniqueId: uniqueId,
-            crestType: border["crest-type"],
-            rankedTier: border["ranked-tier"],
-            previewPath: this.getPreviewPath(border.assetPath)
-          };
-        });
-        
-        if (window.ROSEJadeLog) {
-          window.ROSEJadeLog('info', 'Borders loaded from API', { 
-            count: this.borderList.length,
-            types: [...new Set(this.borderList.map(b => b.crestType))]
-          });
-        }
+        this.processBordersData(bordersData);
         
       } catch (error) {
         if (window.ROSEJadeLog) {
@@ -282,6 +342,29 @@
       }
     }
       
+    processBordersData(bordersData) {
+      this.borderList = bordersData.map(border => {
+        const uniqueId = border["ranked-tier"] ? 
+          `${border.id}-${border["ranked-tier"]}` : 
+          border.id;
+        
+        return {
+          id: border.id,
+          uniqueId: uniqueId,
+          crestType: border["crest-type"],
+          rankedTier: border["ranked-tier"],
+          previewPath: this.getPreviewPath(border.assetPath)
+        };
+      });
+      
+      if (window.ROSEJadeLog) {
+        window.ROSEJadeLog('info', 'Borders loaded from API', { 
+          count: this.borderList.length,
+          types: [...new Set(this.borderList.map(b => b.crestType))]
+        });
+      }
+    }
+
     getPreviewPath(assetPath) {
       return assetPath;
     }
