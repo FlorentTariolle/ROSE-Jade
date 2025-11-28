@@ -1,5 +1,3 @@
-window.Effect.apply('unified', { color: "#000000DA" });
-
 import "./config/css/plug-th.css";
 import * as observer from './config/js/main/observer.js';
 import * as shadowDom from './config/js/main/shadowDom.js';
@@ -453,11 +451,16 @@ const initializeObserver = async () => {
             await SettingsStore.loadSettings();
             this.initializeSettings();
             
+            // Apply unified effect only if background plugin is enabled
+            if (CONFIG.regaliaBackgroundEnabled) {
+                if (window.Effect && typeof window.Effect.apply === 'function') {
+                    window.Effect.apply('unified', { color: "#000000DA" });
+                }
+                this.loadPlugin("RegaliaBackground");
+            }
+            
             if (CONFIG.regaliaBorderEnabled) {
                 this.loadPlugin("RegaliaBorder");
-            }
-            if (CONFIG.regaliaBackgroundEnabled) {
-                this.loadPlugin("RegaliaBackground");
             }
             if (CONFIG.regaliaBannerEnabled) {
                 this.loadPlugin("RegaliaBanner");
@@ -856,8 +859,27 @@ const initializeObserver = async () => {
                 const checkbox = document.querySelector(`#${checkboxId} input[type="checkbox"]`);
                 if (checkbox) {
                     checkbox.addEventListener('change', (e) => {
+                        const wasEnabled = CONFIG[configKey];
                         CONFIG[configKey] = e.target.checked;
                         SettingsStore.saveSettings();
+                        
+                        // Handle unified effect for background plugin
+                        if (configKey === 'regaliaBackgroundEnabled') {
+                            if (e.target.checked && !wasEnabled) {
+                                // Enable background - apply unified effect
+                                if (window.Effect && typeof window.Effect.apply === 'function') {
+                                    window.Effect.apply('unified', { color: "#000000DA" });
+                                }
+                            } else if (!e.target.checked && wasEnabled) {
+                                // Disable background - remove unified effect
+                                if (window.Effect && typeof window.Effect.remove === 'function') {
+                                    window.Effect.remove('unified');
+                                } else if (window.Effect && typeof window.Effect.apply === 'function') {
+                                    // Fallback: apply transparent effect to clear it
+                                    window.Effect.apply('unified', { color: "#00000000" });
+                                }
+                            }
+                        }
                         
                         const flatCheckbox = checkbox.closest('lol-uikit-flat-checkbox');
                         if (flatCheckbox) {
