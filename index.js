@@ -221,7 +221,6 @@ const initializeObserver = async () => {
         regaliaTitleEnabled: false,
         addonAAEnabled: false,
 		addonWinLose: false,
-        addonLobbyBttnEnabled: false,
         addonBckChangerEnabled: false,
         easterEggEnabled: false
     };
@@ -289,7 +288,6 @@ const initializeObserver = async () => {
                 restartButton: "Перезагрузить",
                 addons: "Аддоны",
                 addonAADesc: "Автопринятие игр",
-                addonLobbyBttnDesc: "Включить кнопку скрытия списка друзей",
 				addonWinLoseDesc: "Включить отображение статистики игр",
                 addonBckChangerDesc: "Скоро...",
                 AAMatchFound: "Включить автоматическое принятие",
@@ -308,7 +306,6 @@ const initializeObserver = async () => {
                 restartButton: "重启",
                 addons: "插件",
                 addonAADesc: "自动接受游戏",
-                addonLobbyBttnDesc: "好友列表按钮",
 				addonWinLoseDesc: "Enable WinLose Stats",
                 addonBckChangerDesc: "Coming soon...",
                 AAMatchFound: "Enable Auto Accept",
@@ -327,7 +324,6 @@ const initializeObserver = async () => {
                 restartButton: "Restart",
                 addons: "Addons",
                 addonAADesc: "Auto Accept games",
-                addonLobbyBttnDesc: "Friendlist Button",
 				addonWinLoseDesc: "Enable WinLose Stats",
                 addonBckChangerDesc: "Coming soon...",
                 AAMatchFound: "Enable Auto Accept",
@@ -413,7 +409,6 @@ const initializeObserver = async () => {
                         regaliaTitleEnabled: userSettings.regaliaTitleEnabled ?? DEFAULT_CONFIG.regaliaTitleEnabled,
                         addonAAEnabled: userSettings.addonAAEnabled ?? DEFAULT_CONFIG.addonAAEnabled,
                         addonWinLose: userSettings.addonWinLose ?? DEFAULT_CONFIG.addonWinLose,
-                        addonLobbyBttnEnabled: userSettings.addonLobbyBttnEnabled ?? DEFAULT_CONFIG.addonLobbyBttnEnabled,
                         addonBckChangerEnabled: userSettings.addonBckChangerEnabled ?? DEFAULT_CONFIG.addonBckChangerEnabled,
                         easterEggEnabled: userSettings.easterEggEnabled ?? DEFAULT_CONFIG.easterEggEnabled
                     };
@@ -433,7 +428,6 @@ const initializeObserver = async () => {
                     regaliaTitleEnabled: CONFIG.regaliaTitleEnabled,
                     addonAAEnabled: CONFIG.addonAAEnabled,
 					addonWinLose: CONFIG.addonWinLose,
-                    addonLobbyBttnEnabled: CONFIG.addonLobbyBttnEnabled,
                     addonBckChangerEnabled: CONFIG.addonBckChangerEnabled,
                     easterEggEnabled: CONFIG.easterEggEnabled
                 };
@@ -483,9 +477,6 @@ const initializeObserver = async () => {
             }
 			if (CONFIG.addonWinLose) {
                 this.loadAddon("WinLose");
-            }
-            if (CONFIG.addonLobbyBttnEnabled) {
-                this.loadAddon("LobbyBttn");
             }
             if (CONFIG.addonBckChangerEnabled) {
                 this.loadAddon("BckChanger");
@@ -803,18 +794,6 @@ const initializeObserver = async () => {
                                 </div>
                             </div>
 
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: thin solid #3c3c41;">
-                                <lol-uikit-flat-checkbox ${CONFIG.addonLobbyBttnEnabled ? 'class="checked"' : ''} style="margin-right: 15px;">
-                                    <input slot="input" type="checkbox" ${CONFIG.addonLobbyBttnEnabled ? 'checked' : ''}>
-                                </lol-uikit-flat-checkbox>
-                                <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
-                                    <p class="lol-settings-window-size-text" style="margin: 0; font-size: 12px; color: #a09b8c;">
-                                        ${LanguageManager.t('addonLobbyBttnDesc')}
-                                    </p>
-                                </div>
-                            </div>
-
-
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
                                 <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                                     <p class="lol-settings-window-size-text" style="margin: 0; font-size: 12px; color: #a09b8c;">
@@ -970,13 +949,9 @@ const initializeObserver = async () => {
                     checkboxes[0].id = 'aaCheckbox';
                     checkboxHandler('aaCheckbox', 'addonAAEnabled');
                 }
-				if (checkboxes[1]) {
+                if (checkboxes[1]) {
                     checkboxes[1].id = 'WinLoseCheckbox';
                     checkboxHandler('WinLoseCheckbox', 'addonWinLose');
-                }
-                if (checkboxes[2]) {
-                    checkboxes[2].id = 'lobbyBttnCheckbox';
-                    checkboxHandler('lobbyBttnCheckbox', 'addonLobbyBttnEnabled');
                 }
             }, 100);
 
