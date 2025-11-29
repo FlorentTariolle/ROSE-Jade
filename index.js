@@ -313,7 +313,7 @@ const initializeObserver = async () => {
                 AAMuteSound: "Mute Sound"
             },
             en: {
-                pluginSettings: "Plugin Settings",
+                pluginSettings: "PLUGINS",
                 restartRequired: "Restart Required!",
                 restartRequiredDesc: "Changes will take effect after restarting the client",
                 borderDesc: "Enable Border changes",
@@ -322,7 +322,7 @@ const initializeObserver = async () => {
                 iconDesc: "Enable Icon changes",
                 TitleDesc: "Enable Title changes",
                 restartButton: "Restart",
-                addons: "Addons",
+                addons: "ADDONS",
                 addonAADesc: "Auto Accept games",
 				addonWinLoseDesc: "Enable WinLose Stats",
                 addonBckChangerDesc: "Coming soon...",
@@ -350,14 +350,14 @@ const initializeObserver = async () => {
                 {
                     name: "Rose-plugin-settings",
                     title: "el_Rose_plugin_settings",
-                    titleName: "Plugin Settings",
+                    titleName: "PLUGINS",
                     class: "Rose-plugin-settings",
                     id: "RosePluginSettings",
                 },
                 {
                     name: "Rose-addon",
                     title: "el_Rose_addon",
-                    titleName: "Addons",
+                    titleName: "ADDONS",
                     class: "Rose-addon",
                     id: "RoseAddon",
                 },

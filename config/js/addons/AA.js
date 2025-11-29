@@ -437,11 +437,11 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
             capitalTitleName: "Rose / AutoAccept",
             element: [
                 {
-                    name: "eaa-settings", 
-                    title: "el_RoseAA_settings",
-                    titleName: "Settings",
-                    class: "eaa-settings",
-                    id: "RoseAASettings",
+                name: "eaa-settings", 
+                title: "el_RoseAA_settings",
+                titleName: "SETTINGS",
+                class: "eaa-settings",
+                id: "RoseAASettings",
                 },
             ],
         },

@@ -9,7 +9,7 @@ const baseData = [
             {
                 name: "bgcm-settings", 
                 title: "el_RoseBackground_settings",
-                titleName: "Settings",
+                titleName: "SETTINGS",
                 class: "bgcm-settings",
                 id: "RoseBackgroundSettings",
             },
@@ -1475,7 +1475,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 							<div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
 								<div style="display: flex; align-items: center; gap: 10px; flex: 1;">
 									<p class="lol-settings-window-size-text" style="margin: 0; font-size: 12px; color: #a09b8c;">
-										${LanguageManager.t('BlurAmount')}: ${this.settings.blurAmount}px
+										${LanguageManager.t('BlurAmount')}: ${this.settings.blurAmount}%
 									</p>
 								</div>
 							</div>
@@ -1488,7 +1488,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 											<div class="lol-uikit-slider-base" style="height: 30px; width: 100%; position: absolute;">
 												<div class="lol-uikit-slider-base-track" style="position: absolute; top: 14px; left: 0; width: calc(100% - 2.5px); height: 2px; background: #1e2328;"></div>
 												<div class="lol-uikit-slider-fill" style="width: ${buttonPosition}px; height: 2px; background: linear-gradient(to left, #695625, #463714); position: absolute; top: 13px; border: thin solid #010a13; transition: width 0.1s ease-out, background 0.2s ease;"></div>
-												<div class="lol-uikit-slider-button" style="left: ${buttonPosition}px; width: 30px; height: 30px; background: url('/fe/lol-uikit/images/slider-btn.png') no-repeat top left; background-size: 100%; position: absolute; top: 0px; cursor: pointer; transition: left 0.1s ease-out, background-position 0.2s ease;"></div>
+												<div class="lol-uikit-slider-button" style="left: ${buttonPosition}px; width: 30px; height: 30px; background: url('/fe/lol-uikit/images/slider-btn.png') no-repeat top left; background-size: 100%; position: absolute; top: 0px; cursor: pointer; transition: left 0.1s ease-out;"></div>
 											</div>
 										</div>
 									</div>
@@ -1537,15 +1537,20 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 							button.style.transition = 'none';
 							fill.style.transition = 'none';
 						} else {
-							button.style.transition = 'left 0.1s ease-out, background-position 0.2s ease';
+							button.style.transition = 'left 0.1s ease-out';
 							fill.style.transition = 'width 0.1s ease-out, background 0.2s ease';
 						}
 						
 						button.style.left = `${buttonPosition}px`;
 						fill.style.width = `${buttonPosition}px`;
-						valueDisplay.textContent = `${LanguageManager.t('BlurAmount')}: ${value}px`;
+						valueDisplay.textContent = `${LanguageManager.t('BlurAmount')}: ${value}%`;
 						this.settings.blurAmount = value;
 						this.saveSettings();
+						
+						// Maintain hover effects after slider update
+						if (!isDragging) {
+							updateHoverEffects();
+						}
 					};
 
 					const updateHoverEffects = () => {
@@ -1556,7 +1561,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 							button.style.backgroundPosition = isDragging ? '0 -60px' : '0 -30px';
 						} else {
 							fill.style.background = 'linear-gradient(to left, #695625, #463714)';
-							button.style.backgroundPosition = 'top left';
+							button.style.backgroundPosition = '0 0';
 						}
 					};
 
@@ -1564,17 +1569,50 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 						updateSlider(parseInt(e.target.value));
 					});
 
-					const sliderWrapper = document.querySelector('.bgcm-settings .lol-uikit-slider-wrapper');
-					
-					sliderWrapper.addEventListener('mouseenter', () => {
-						isHovered = true;
-						updateHoverEffects();
-					});
+					// Use the slider container for hover detection to be more precise
+					const sliderContainer = slider.closest('.lol-settings-slider');
+					if (sliderContainer) {
+						sliderContainer.addEventListener('mouseenter', () => {
+							isHovered = true;
+							updateHoverEffects();
+						});
 
-					sliderWrapper.addEventListener('mouseleave', () => {
-						isHovered = false;
-						updateHoverEffects();
-					});
+						sliderContainer.addEventListener('mouseleave', () => {
+							isHovered = false;
+							updateHoverEffects();
+						});
+						
+						// Also handle mouseover on child elements to ensure hover state is maintained
+						const handleMouseOver = () => {
+							if (!isHovered) {
+								isHovered = true;
+								updateHoverEffects();
+							}
+						};
+						
+						const handleMouseOut = (e) => {
+							// Check if we're actually leaving the container
+							const relatedTarget = e.relatedTarget;
+							if (!relatedTarget || !sliderContainer.contains(relatedTarget)) {
+								isHovered = false;
+								updateHoverEffects();
+							}
+						};
+						
+						// Add listeners to all interactive child elements
+						const buttonElement = sliderContainer.querySelector('.lol-uikit-slider-button');
+						const trackElement = sliderContainer.querySelector('.lol-uikit-slider-base-track');
+						
+						if (buttonElement) {
+							buttonElement.addEventListener('mouseover', handleMouseOver);
+							buttonElement.addEventListener('mouseout', handleMouseOut);
+						}
+						
+						if (trackElement) {
+							trackElement.addEventListener('mouseover', handleMouseOver);
+							trackElement.addEventListener('mouseout', handleMouseOut);
+						}
+					}
 
 					const handleMouseMove = (e) => {
 						if (!isDragging) return;
@@ -1594,7 +1632,7 @@ import { settingsUtils } from "https://unpkg.com/blank-settings-utils@latest/Set
 						isDragging = false;
 						updateHoverEffects();
 
-						button.style.transition = 'left 0.1s ease-out, background-position 0.2s ease';
+						button.style.transition = 'left 0.1s ease-out';
 						fill.style.transition = 'width 0.1s ease-out, background 0.2s ease';
 
 						document.removeEventListener('mousemove', handleMouseMove);

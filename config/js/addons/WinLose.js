@@ -11,7 +11,7 @@ let data = [
       {
         name: "winlose-settings",
         title: "el_winlose_settings",
-        titleName: "Settings",
+        titleName: "SETTINGS",
         class: "winlose-settings",
         id: "WinLoseSettings",
       },
